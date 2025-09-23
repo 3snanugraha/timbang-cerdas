@@ -244,17 +244,17 @@ export default function TransactionPage() {
     if (savedTransaction && thermalSettings) {
       setShowThermalPreview(true);
     } else {
-      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia");
+      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia untuk dicetak");
     }
   };
 
-  const handleSendPDF = () => {
+  const handleSendPDF = async () => {
     setShowSuccessModal(false);
-    if (savedTransaction && thermalSettings) {
-      setShowThermalPreview(true);
-    } else {
-      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia");
+    if (!savedTransaction || !thermalSettings) {
+      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia untuk membuat PDF");
+      return;
     }
+    await handleThermalPDF(); // Directly call the PDF generation
   };
 
   const handleThermalPrint = async () => {
@@ -275,10 +275,11 @@ export default function TransactionPage() {
           }}
         ]);
       } else {
-        Alert.alert("Error", result.message);
+        Alert.alert("Error", result.message || "Gagal mencetak struk");
       }
-    } catch {
-      Alert.alert("Error", "Gagal mencetak struk");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Terjadi kesalahan tidak diketahui";
+      Alert.alert("Error", `Gagal mencetak struk: ${message}`);
     } finally {
       setPrintLoading(false);
     }
@@ -688,57 +689,56 @@ export default function TransactionPage() {
             </Text>
 
             {/* Action Buttons */}
-            <View style={{ width: '100%', gap: 12 }}>
-              <Pressable
-                onPress={handlePrint}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingVertical: 12,
-                  paddingHorizontal: 20,
-                  backgroundColor: '#16a34a',
-                  borderRadius: 12,
-                }}
-              >
-                <Printer size={18} color="white" style={{ marginRight: 8 }} />
-                <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>Cetak</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleSendPDF}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingVertical: 12,
-                  paddingHorizontal: 20,
-                  backgroundColor: '#2563eb',
-                  borderRadius: 12,
-                }}
-              >
-                <Send size={18} color="white" style={{ marginRight: 8 }} />
-                <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>Kirim PDF</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleCloseSuccess}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingVertical: 12,
-                  paddingHorizontal: 20,
-                  backgroundColor: '#f3f4f6',
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: '#e5e7eb',
-                }}
-              >
-                <X size={18} color="#6b7280" style={{ marginRight: 8 }} />
-                <Text style={{ color: '#6b7280', fontWeight: '600', fontSize: 16 }}>Tutup</Text>
-              </Pressable>
-            </View>
+                      <View style={{ width: '100%', gap: 12 }}>
+                        <Pressable
+                          onPress={handlePrint}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingVertical: 12,
+                            paddingHorizontal: 20,
+                            backgroundColor: '#16a34a',
+                            borderRadius: 12,
+                          }}
+                        >
+                          <Printer size={18} color="white" style={{ marginRight: 8 }} />
+                          <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>Cetak Struk</Text>
+                        </Pressable>
+            
+                        <Pressable
+                          onPress={handleSendPDF}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingVertical: 12,
+                            paddingHorizontal: 20,
+                            backgroundColor: '#2563eb',
+                            borderRadius: 12,
+                          }}
+                        >
+                          <Send size={18} color="white" style={{ marginRight: 8 }} />
+                          <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>Kirim PDF</Text>
+                        </Pressable>
+            
+                        <Pressable
+                          onPress={handleCloseSuccess}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingVertical: 12,
+                            paddingHorizontal: 20,
+                            backgroundColor: '#f3f4f6',
+                            borderRadius: 12,
+                            borderWidth: 1,
+                            borderColor: '#e5e7eb',
+                          }}
+                        >
+                          <X size={18} color="#6b7280" style={{ marginRight: 8 }} />
+                          <Text style={{ color: '#6b7280', fontWeight: '600', fontSize: 16 }}>Tutup</Text>
+                        </Pressable>            </View>
           </View>
         </View>
       </Modal>
@@ -751,7 +751,6 @@ export default function TransactionPage() {
           transaction={savedTransaction}
           settings={thermalSettings}
           onPrint={handleThermalPrint}
-          onGeneratePDF={handleThermalPDF}
           loading={printLoading}
         />
       )}

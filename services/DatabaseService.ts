@@ -428,6 +428,21 @@ class DatabaseService {
     }
   }
 
+  async getTransactionsByDateRange(userId: number, startDate: string, endDate: string): Promise<Transaction[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      const transactions = await this.db.getAllAsync<Transaction>(
+        'SELECT * FROM transactions WHERE user_id = ? AND transaction_date BETWEEN ? AND ? ORDER BY created_at DESC',
+        [userId, startDate, endDate]
+      );
+      return transactions;
+    } catch (error) {
+      console.error('Get transactions by date range error:', error);
+      throw error;
+    }
+  }
+
   // Company Settings Management
   async getCompanySettings(userId: number): Promise<CompanySettings | null> {
     if (!this.db) throw new Error('Database not initialized');

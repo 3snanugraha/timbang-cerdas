@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
-import { X, Printer, Send } from 'lucide-react-native';
+import { X, Printer } from 'lucide-react-native';
 import ThermalReceiptTemplate, { ThermalSettings } from './ThermalReceiptTemplate';
 import { Transaction } from '../../services/DatabaseService';
 
@@ -10,18 +10,16 @@ export interface ThermalReceiptPreviewProps {
   transaction: Transaction | null;
   settings: ThermalSettings;
   onPrint: () => void;
-  onGeneratePDF: () => void;
   loading?: boolean;
 }
 
-const ThermalReceiptPreview: React.FC<ThermalReceiptPreviewProps> = ({
-  visible,
-  onClose,
-  transaction,
-  settings,
-  onPrint,
-  onGeneratePDF,
-  loading = false
+const ThermalReceiptPreview: React.FC<ThermalReceiptPreviewProps> = ({ 
+  visible, 
+  onClose, 
+  transaction, 
+  settings, 
+  onPrint, 
+  loading = false 
 }) => {
   if (!transaction) return null;
 
@@ -100,29 +98,6 @@ const ThermalReceiptPreview: React.FC<ThermalReceiptPreviewProps> = ({
                 fontSize: 16 
               }}>
                 {loading ? 'Mencetak...' : 'Cetak Sekarang'}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={onGeneratePDF}
-              disabled={loading}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingVertical: 12,
-                paddingHorizontal: 20,
-                backgroundColor: loading ? '#9ca3af' : '#2563eb',
-                borderRadius: 12,
-              }}
-            >
-              <Send size={18} color="white" style={{ marginRight: 8 }} />
-              <Text style={{ 
-                color: 'white', 
-                fontWeight: '600', 
-                fontSize: 16 
-              }}>
-                {loading ? 'Membuat PDF...' : 'Simpan & Kirim PDF'}
               </Text>
             </Pressable>
 

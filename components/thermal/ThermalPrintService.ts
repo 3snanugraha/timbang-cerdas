@@ -163,28 +163,42 @@ class ThermalPrintService {
     return html;
   }
 
-  // Print thermal receipt - redirect to PDF generation since physical printing has issues
+  // Print thermal receipt directly
   async printReceipt(options: PrintOptions): Promise<{ success: boolean; message?: string }> {
     try {
-      console.log('Print requested - redirecting to PDF generation...');
+      console.log('Direct thermal print requested...');
+      const html = this.generateReceiptHTML(options.transaction, options.settings);
 
-      // Instead of physical printing, generate and share PDF
-      const result = await this.generateAndSharePDF(options);
+      // Select a printer (optional, opens a picker)
+      // const printer = await Print.selectPrinterAsync();
 
-      if (result.success) {
-        return {
-          success: true,
-          message: 'Struk berhasil dibuat dalam format PDF dan dibagikan'
-        };
-      } else {
-        return result;
-      }
+      await Print.printAsync({
+        html,
+        // printerUrl: printer?.url, // Use selected printer
+        width: 155, // Corresponds to 58mm paper width, adjust as needed
+      });
+
+      console.log('Print job sent successfully');
+      return {
+        success: true,
+        message: 'Struk berhasil dikirim ke printer'
+      };
 
     } catch (error) {
-      console.error('Print redirect error:', error);
+      console.error('Direct print error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Provide a more user-friendly error message
+      if (errorMessage.includes('print is not available')) {
+        return {
+          success: false,
+          message: 'Pencetakan tidak tersedia di perangkat ini.'
+        };
+      }
+      
       return {
         success: false,
-        message: 'Gagal membuat struk. Silakan coba lagi.'
+        message: `Gagal mencetak: ${errorMessage}`
       };
     }
   }

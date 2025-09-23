@@ -2,6 +2,7 @@ import { Text, View, ScrollView, Pressable, TextInput, Alert, RefreshControl, Mo
 import { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   Search,
   Filter,
@@ -14,13 +15,15 @@ import {
   Clock,
   X,
   DollarSign,
-  Send
+  Send,
+  Download
 } from "lucide-react-native";
 import { router } from "expo-router";
+import * as FileSystem from 'expo-file-system';
 import AuthService from "../../services/AuthService";
 import DatabaseService, { Transaction } from "../../services/DatabaseService";
-import { ThermalPrintService, ThermalReceiptPreview } from '../../components/thermal';
-import type { ThermalSettings } from '../../components/thermal';
+import { ThermalPrintService, ThermalReceiptPreview, type ThermalSettings } from '../../components/thermal';
+import * as Sharing from 'expo-sharing';
 
 // Using Transaction interface from DatabaseService
 
@@ -39,6 +42,13 @@ export default function HistoryPage() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportStartDate, setExportStartDate] = useState<Date | null>(null);
+  const [exportEndDate, setExportEndDate] = useState<Date | null>(null);
+  const [exportStartDateString, setExportStartDateString] = useState("");
+  const [exportEndDateString, setExportEndDateString] = useState("");
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showThermalPreview, setShowThermalPreview] = useState(false);
   const [thermalSettings, setThermalSettings] = useState<ThermalSettings | null>(null);
   const [printLoading, setPrintLoading] = useState(false);
@@ -253,8 +263,17 @@ export default function HistoryPage() {
       setShowActionModal(false);
       setShowThermalPreview(true);
     } else {
-      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia");
+      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia untuk dicetak");
     }
+  };
+
+  const handleSendPDF = async () => {
+    if (!selectedTransaction || !thermalSettings) {
+      Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia untuk membuat PDF");
+      return;
+    }
+    setShowActionModal(false);
+    await handleThermalPDF(); // Directly call the PDF generation
   };
 
   const handleThermalPrint = async () => {
@@ -272,10 +291,11 @@ export default function HistoryPage() {
           { text: "OK", onPress: () => setShowThermalPreview(false) }
         ]);
       } else {
-        Alert.alert("Error", result.message);
+        Alert.alert("Error", result.message || "Gagal mencetak struk");
       }
-    } catch {
-      Alert.alert("Error", "Gagal mencetak struk");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Terjadi kesalahan tidak diketahui";
+      Alert.alert("Error", `Gagal mencetak struk: ${message}`);
     } finally {
       setPrintLoading(false);
     }
@@ -316,6 +336,55 @@ export default function HistoryPage() {
       sortBy: 'newest'
     });
     setShowFilterModal(false);
+  };
+
+  const handleExport = async () => {
+    if (!exportStartDate || !exportEndDate) {
+      Alert.alert("Error", "Silakan pilih rentang tanggal.");
+      return;
+    }
+
+    if (exportStartDate > exportEndDate) {
+      Alert.alert("Error", "Tanggal mulai tidak boleh lebih besar dari tanggal selesai.");
+      return;
+    }
+
+    try {
+      const currentUser = AuthService.getCurrentUser();
+      if (!currentUser) {
+        Alert.alert("Error", "Sesi berakhir. Silakan login kembali.");
+        router.replace("/(auth)/login");
+        return;
+      }
+
+      const startDateString = exportStartDate.toISOString().split('T')[0];
+      const endDateString = exportEndDate.toISOString().split('T')[0];
+
+      const transactionsToExport = await DatabaseService.getTransactionsByDateRange(
+        currentUser.id,
+        startDateString,
+        endDateString
+      );
+
+      if (transactionsToExport.length === 0) {
+        Alert.alert("Info", "Tidak ada transaksi untuk diekspor pada rentang tanggal yang dipilih.");
+        return;
+      }
+
+      const html = generateTransactionExportHTML(transactionsToExport, startDateString, endDateString);
+      const { uri } = await Print.printToFileAsync({ html });
+
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'Export Laporan Transaksi',
+      });
+
+      setShowExportModal(false);
+
+    } catch (error) {
+      console.error("Export error:", error);
+      Alert.alert("Error", "Gagal mengekspor data.");
+    }
   };
 
   const getActiveFilterCount = () => {
@@ -418,6 +487,22 @@ export default function HistoryPage() {
                 </Text>
               </View>
             )}
+          </Pressable>
+
+          <Pressable
+            onPress={() => setShowExportModal(true)}
+            style={{
+              width: 48,
+              height: 48,
+              borderWidth: 1,
+              borderColor: '#e5e7eb',
+              borderRadius: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'white',
+            }}
+          >
+            <Download size={20} color="#374151" />
           </Pressable>
         </View>
 
@@ -741,18 +826,11 @@ export default function HistoryPage() {
                   </Pressable>
 
                   <Pressable
-                    onPress={() => {
-                      if (selectedTransaction && thermalSettings) {
-                        setShowActionModal(false);
-                        setShowThermalPreview(true);
-                      } else {
-                        Alert.alert("Error", "Data transaksi atau pengaturan tidak tersedia");
-                      }
-                    }}
+                    onPress={handleSendPDF}
                     className="flex-row items-center py-3 px-4 rounded-lg bg-blue-50"
                   >
                     <Send size={20} color="#2563eb" />
-                    <Text className="text-blue-700 font-medium ml-3">Cetak PDF</Text>
+                    <Text className="text-blue-700 font-medium ml-3">Kirim PDF</Text>
                   </Pressable>
 
                   <Pressable
@@ -784,10 +862,81 @@ export default function HistoryPage() {
           transaction={selectedTransaction}
           settings={thermalSettings}
           onPrint={handleThermalPrint}
-          onGeneratePDF={handleThermalPDF}
           loading={printLoading}
         />
       )}
+
+      {/* Export Modal */}
+      <Modal
+        visible={showExportModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowExportModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl p-6">
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="text-xl font-bold text-gray-900">Export Transaksi</Text>
+              <Pressable onPress={() => setShowExportModal(false)}>
+                <X size={24} color="#374151" />
+              </Pressable>
+            </View>
+
+            <View className="mb-6">
+              <Text className="text-sm font-semibold text-gray-700 mb-3">Pilih Rentang Waktu</Text>
+              <View className="flex-row space-x-3">
+                <Pressable onPress={() => setShowStartDatePicker(true)} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white">
+                  <Text className="text-gray-900">{exportStartDate ? exportStartDate.toLocaleDateString('id-ID') : "Tanggal Mulai"}</Text>
+                </Pressable>
+                <Pressable onPress={() => setShowEndDatePicker(true)} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white">
+                  <Text className="text-gray-900">{exportEndDate ? exportEndDate.toLocaleDateString('id-ID') : "Tanggal Selesai"}</Text>
+                </Pressable>
+              </View>
+              {showStartDatePicker && (
+                <DateTimePicker
+                  value={exportStartDate || new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowStartDatePicker(false);
+                    if (selectedDate) {
+                      setExportStartDate(selectedDate);
+                    }
+                  }}
+                />
+              )}
+              {showEndDatePicker && (
+                <DateTimePicker
+                  value={exportEndDate || new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowEndDatePicker(false);
+                    if (selectedDate) {
+                      setExportEndDate(selectedDate);
+                    }
+                  }}
+                />
+              )}
+            </View>
+
+            <View className="flex-row space-x-3">
+              <Pressable
+                onPress={() => setShowExportModal(false)}
+                className="flex-1 py-3 rounded-lg border border-gray-300 items-center"
+              >
+                <Text className="text-gray-700 font-medium">Batal</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleExport}
+                className="flex-1 py-3 rounded-lg bg-blue-600 items-center"
+              >
+                <Text className="text-white font-medium">Export</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
