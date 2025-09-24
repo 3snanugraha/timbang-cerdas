@@ -826,7 +826,8 @@ export default function SettingsPage() {
             <ThermalReceiptTemplate
               isPreview={true}
               transaction={{
-                id: 'preview-001',
+                id: 1,
+                user_id: 1,
                 customer_name: 'Budi Santoso',
                 jenis_barang: 'Kelapa Sawit',
                 bruto_kg: 1500,
@@ -839,8 +840,9 @@ export default function SettingsPage() {
                 total_harga: 856800,
                 transaction_date: new Date().toISOString().split('T')[0],
                 admin_name: 'Admin',
+                alamat: '',
+                phone: '',
                 catatan: companySettings.show_notes ? 'Kualitas bagus' : '',
-                user_id: 'preview',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               }}
@@ -848,7 +850,6 @@ export default function SettingsPage() {
                 company_name: companySettings.company_name,
                 company_address: companySettings.company_address,
                 company_phone: companySettings.company_phone,
-                company_phone_label: "",
                 footer_text: companySettings.footer_text,
                 show_admin: companySettings.show_admin,
                 show_customer: companySettings.show_customer,

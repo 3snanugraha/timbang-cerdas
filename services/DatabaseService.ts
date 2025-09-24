@@ -277,49 +277,48 @@ class DatabaseService {
   }
 
   // Transaction Management
-  async createTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>): Promise<Transaction> {
-    if (!this.db) throw new Error('Database not initialized');
-
-    try {
-      const result = await this.db.runAsync(
-        `INSERT INTO transactions (
-          user_id, transaction_date, jenis_barang, bruto_kg, tare_kg, 
-          netto_kg, pot_percentage, pot_kg, harga_per_kg, total_kg, 
-          total_harga, admin_name, customer_name, alamat, phone, catatan
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          transaction.user_id,
-          transaction.transaction_date,
-          transaction.jenis_barang,
-          transaction.bruto_kg,
-          transaction.tare_kg,
-          transaction.netto_kg,
-          transaction.pot_percentage,
-          transaction.pot_kg,
-          transaction.harga_per_kg,
-          transaction.total_kg,
-          transaction.total_harga,
-          transaction.admin_name,
-          transaction.customer_name,
-          transaction.alamat,
-          transaction.phone,
-          transaction.catatan,
-        ]
-      );
-
-      const newTransaction = await this.db.getFirstAsync<Transaction>(
-        'SELECT * FROM transactions WHERE id = ?',
-        [result.lastInsertRowId]
-      );
-
-      if (!newTransaction) throw new Error('Failed to create transaction');
-      return newTransaction;
-    } catch (error) {
-      console.error('Create transaction error:', error);
-      throw error;
+    async createTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>): Promise<Transaction> {
+      if (!this.db) throw new Error('Database not initialized');
+  
+      try {
+        const result = await this.db.runAsync(
+          `INSERT INTO transactions ( 
+            user_id, transaction_date, jenis_barang, bruto_kg, tare_kg, 
+            netto_kg, pot_percentage, pot_kg, harga_per_kg, total_kg, 
+            total_harga, admin_name, customer_name, alamat, phone, catatan
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            transaction.user_id,
+            transaction.transaction_date || new Date().toISOString().split('T')[0],
+            transaction.jenis_barang || '',
+            transaction.bruto_kg || 0,
+            transaction.tare_kg || 0,
+            transaction.netto_kg || 0,
+            transaction.pot_percentage || 0,
+            transaction.pot_kg || 0,
+            transaction.harga_per_kg || 0,
+            transaction.total_kg || 0,
+            transaction.total_harga || 0,
+            transaction.admin_name || '',
+            transaction.customer_name || '',
+            transaction.alamat || '',
+            transaction.phone || '',
+            transaction.catatan || '',
+          ]
+        );
+  
+        const newTransaction = await this.db.getFirstAsync<Transaction>(
+          'SELECT * FROM transactions WHERE id = ?',
+          [result.lastInsertRowId]
+        );
+  
+        if (!newTransaction) throw new Error('Failed to create transaction');
+        return newTransaction;
+      } catch (error) {
+        console.error('Create transaction error:', error);
+        throw error;
+      }
     }
-  }
-
   async getUserTransactions(userId: number, limit?: number, offset?: number): Promise<Transaction[]> {
     if (!this.db) throw new Error('Database not initialized');
 
@@ -383,33 +382,155 @@ class DatabaseService {
 
     try {
       await this.db.runAsync(
-        `UPDATE transactions SET 
-         jenis_barang = ?, bruto_kg = ?, tare_kg = ?, netto_kg = ?, 
-         pot_percentage = ?, pot_kg = ?, harga_per_kg = ?, total_kg = ?, 
-         total_harga = ?, admin_name = ?, customer_name = ?, alamat = ?, 
+        `UPDATE transactions SET
+         jenis_barang = ?, bruto_kg = ?, tare_kg = ?, netto_kg = ?,
+         pot_percentage = ?, pot_kg = ?, harga_per_kg = ?, total_kg = ?,
+         total_harga = ?, admin_name = ?, customer_name = ?, alamat = ?,
          phone = ?, catatan = ?, updated_at = CURRENT_TIMESTAMP
          WHERE id = ? AND user_id = ?`,
         [
-          transaction.jenis_barang,
-          transaction.bruto_kg,
-          transaction.tare_kg,
-          transaction.netto_kg,
-          transaction.pot_percentage,
-          transaction.pot_kg,
-          transaction.harga_per_kg,
-          transaction.total_kg,
-          transaction.total_harga,
-          transaction.admin_name,
-          transaction.customer_name,
-          transaction.alamat,
-          transaction.phone,
-          transaction.catatan,
+          transaction.jenis_barang || '',
+          transaction.bruto_kg || 0,
+          transaction.tare_kg || 0,
+          transaction.netto_kg || 0,
+          transaction.pot_percentage || 0,
+          transaction.pot_kg || 0,
+          transaction.harga_per_kg || 0,
+          transaction.total_kg || 0,
+          transaction.total_harga || 0,
+          transaction.admin_name || '',
+          transaction.customer_name || '',
+          transaction.alamat || '',
+          transaction.phone || '',
+          transaction.catatan || '',
           id,
           userId,
         ]
       );
     } catch (error) {
       console.error('Update transaction error:', error);
+      throw error;
+    }
+  }
+
+  // Update user profile
+  async updateUserProfile(id: number, profile: { username: string; full_name: string }): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      await this.db.runAsync(
+        'UPDATE users SET username = ?, full_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [profile.username, profile.full_name, id]
+      );
+    } catch (error) {
+      console.error('Update user profile error:', error);
+      throw error;
+    }
+  }
+
+  // Verify user password
+  async verifyPassword(username: string, password: string): Promise<boolean> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      const user = await this.getUserByUsername(username);
+      if (!user) return false;
+
+      // For now, since we don't have password hashing logic here,
+      // we'll need AuthService to handle this
+      return false; // This will be handled by AuthService.comparePassword
+    } catch (error) {
+      console.error('Verify password error:', error);
+      return false;
+    }
+  }
+
+  // Delete all user transactions
+  async deleteAllUserTransactions(userId: number): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      await this.db.runAsync('DELETE FROM transactions WHERE user_id = ?', [userId]);
+      console.log('All user transactions deleted successfully');
+    } catch (error) {
+      console.error('Delete all user transactions error:', error);
+      throw error;
+    }
+  }
+
+  // Save company settings (wrapper for updateCompanySettings)
+  async saveCompanySettings(userId: number, settings: Partial<CompanySettings>): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      // First check if settings exist
+      const existing = await this.getCompanySettings(userId);
+
+      if (existing) {
+        // Update existing settings
+        await this.db.runAsync(
+          `UPDATE company_settings SET
+           company_name = ?, company_address = ?, company_phone = ?,
+           company_phone_label = ?, footer_text = ?, paper_width = ?,
+           font_size_header = ?, font_size_body = ?, date_format = ?,
+           decimal_places = ?, thousand_separator = ?, decimal_separator = ?,
+           currency_symbol = ?, show_admin = ?, show_customer = ?,
+           show_notes = ?, show_time = ?, updated_at = CURRENT_TIMESTAMP
+           WHERE user_id = ?`,
+          [
+            settings.company_name || existing.company_name,
+            settings.company_address || existing.company_address,
+            settings.company_phone || existing.company_phone,
+            settings.company_phone_label || existing.company_phone_label,
+            settings.footer_text || existing.footer_text,
+            settings.paper_width || existing.paper_width,
+            settings.font_size_header || existing.font_size_header,
+            settings.font_size_body || existing.font_size_body,
+            settings.date_format || existing.date_format,
+            settings.decimal_places !== undefined ? settings.decimal_places : existing.decimal_places,
+            settings.thousand_separator || existing.thousand_separator,
+            settings.decimal_separator || existing.decimal_separator,
+            settings.currency_symbol || existing.currency_symbol,
+            settings.show_admin !== undefined ? (settings.show_admin ? 1 : 0) : (existing.show_admin ? 1 : 0),
+            settings.show_customer !== undefined ? (settings.show_customer ? 1 : 0) : (existing.show_customer ? 1 : 0),
+            settings.show_notes !== undefined ? (settings.show_notes ? 1 : 0) : (existing.show_notes ? 1 : 0),
+            settings.show_time !== undefined ? (settings.show_time ? 1 : 0) : (existing.show_time ? 1 : 0),
+            userId,
+          ]
+        );
+      } else {
+        // Create new settings
+        await this.db.runAsync(
+          `INSERT INTO company_settings (
+            user_id, company_name, company_address, company_phone, company_phone_label,
+            footer_text, paper_width, font_size_header, font_size_body, date_format,
+            decimal_places, thousand_separator, decimal_separator, currency_symbol,
+            show_admin, show_customer, show_notes, show_time
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            userId,
+            settings.company_name || 'RAM SEKAWAN JAYA SEJAHTERA',
+            settings.company_address || 'Kelurahan Sari Bungamas Lahat',
+            settings.company_phone || '0813 7779 0785',
+            settings.company_phone_label || '(manual)',
+            settings.footer_text || 'Terima Kasih',
+            settings.paper_width || 58,
+            settings.font_size_header || 12,
+            settings.font_size_body || 10,
+            settings.date_format || 'DD/MM/YYYY',
+            settings.decimal_places || 0,
+            settings.thousand_separator || '.',
+            settings.decimal_separator || ',',
+            settings.currency_symbol || 'Rp',
+            settings.show_admin !== undefined ? (settings.show_admin ? 1 : 0) : 1,
+            settings.show_customer !== undefined ? (settings.show_customer ? 1 : 0) : 1,
+            settings.show_notes !== undefined ? (settings.show_notes ? 1 : 0) : 1,
+            settings.show_time !== undefined ? (settings.show_time ? 1 : 0) : 0,
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Save company settings error:', error);
       throw error;
     }
   }
@@ -459,7 +580,7 @@ class DatabaseService {
     }
   }
 
-  async updateCompanySettings(userId: number, settings: Partial<CompanySettings>): Promise<void> {
+  async updateCompanySettings(userId: number, settings: CompanySettings): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
     try {

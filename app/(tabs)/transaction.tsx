@@ -97,7 +97,6 @@ export default function TransactionPage() {
             company_name: companySettings.company_name,
             company_address: companySettings.company_address,
             company_phone: companySettings.company_phone,
-            company_phone_label: companySettings.company_phone_label,
             footer_text: companySettings.footer_text,
             show_admin: companySettings.show_admin,
             show_customer: companySettings.show_customer,
@@ -122,28 +121,21 @@ export default function TransactionPage() {
     const bruto = parseFloat(formData.bruto_kg) || 0;
     const tare = parseFloat(formData.tare_kg) || 0;
     const potPercentage = parseFloat(formData.pot_percentage) || 0;
-    const potKg = parseFloat(formData.pot_kg) || 0;
     const hargaPerKg = parseFloat(formData.harga_per_kg) || 0;
 
-    // Calculate Netto = Bruto - Tare
     const netto = bruto - tare;
-
-    // Calculate additional pot from percentage
-    const additionalPotFromPercentage = (netto * potPercentage) / 100;
-
-    // Calculate Total = Netto - Pot(Kg) - Pot(%)
-    const total = netto - potKg - additionalPotFromPercentage;
-
-    // Calculate Total Harga = Total × Harga/Kg
+    const potKg = (netto * potPercentage) / 100;
+    const total = netto - potKg;
     const totalHarga = total * hargaPerKg;
 
     setFormData(prev => ({
       ...prev,
       netto_kg: Math.max(0, netto),
+      pot_kg: potKg.toString(),
       total_kg: Math.max(0, total),
       total_harga: Math.max(0, totalHarga),
     }));
-  }, [formData.bruto_kg, formData.tare_kg, formData.pot_percentage, formData.pot_kg, formData.harga_per_kg]);
+  }, [formData.bruto_kg, formData.tare_kg, formData.pot_percentage, formData.harga_per_kg]);
 
   // Auto calculation effect
   useEffect(() => {
@@ -499,14 +491,11 @@ export default function TransactionPage() {
                   </View>
                   <View className="flex-1">
                     <Text className="text-sm font-medium text-gray-700 mb-2">Pot (Kg)</Text>
-                    <TextInput
-                      value={formData.pot_kg}
-                      onChangeText={(value) => setFormData(prev => ({ ...prev, pot_kg: value }))}
-                      placeholder="0"
-                      keyboardType="decimal-pad"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-white"
-                      placeholderTextColor="#9ca3af"
-                    />
+                    <View className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50">
+                      <Text className="text-gray-700 font-medium">
+                        {formatNumber(parseFloat(formData.pot_kg))}
+                      </Text>
+                    </View>
                   </View>
                 </View>
 

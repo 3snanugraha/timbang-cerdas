@@ -2,7 +2,7 @@ import { Text, View, ScrollView, Pressable, TextInput, Alert, RefreshControl, Mo
 import { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import {
   Search,
   Filter,
@@ -19,10 +19,12 @@ import {
   Download
 } from "lucide-react-native";
 import { router } from "expo-router";
-import * as FileSystem from 'expo-file-system';
+import * as Print from 'expo-print';
+
 import AuthService from "../../services/AuthService";
 import DatabaseService, { Transaction } from "../../services/DatabaseService";
 import { ThermalPrintService, ThermalReceiptPreview, type ThermalSettings } from '../../components/thermal';
+import { generateTransactionExportHTML } from '../../components/export/TransactionExportTemplate';
 import * as Sharing from 'expo-sharing';
 
 // Using Transaction interface from DatabaseService
@@ -45,8 +47,7 @@ export default function HistoryPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportStartDate, setExportStartDate] = useState<Date | null>(null);
   const [exportEndDate, setExportEndDate] = useState<Date | null>(null);
-  const [exportStartDateString, setExportStartDateString] = useState("");
-  const [exportEndDateString, setExportEndDateString] = useState("");
+
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showThermalPreview, setShowThermalPreview] = useState(false);
@@ -83,7 +84,6 @@ export default function HistoryPage() {
             company_name: companySettings.company_name,
             company_address: companySettings.company_address,
             company_phone: companySettings.company_phone,
-            company_phone_label: companySettings.company_phone_label,
             footer_text: companySettings.footer_text,
             show_admin: companySettings.show_admin,
             show_customer: companySettings.show_customer,
@@ -897,8 +897,7 @@ export default function HistoryPage() {
                   value={exportStartDate || new Date()}
                   mode="date"
                   display="default"
-                  onChange={(event, selectedDate) => {
-                    setShowStartDatePicker(false);
+                  onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
                     if (selectedDate) {
                       setExportStartDate(selectedDate);
                     }
@@ -910,7 +909,7 @@ export default function HistoryPage() {
                   value={exportEndDate || new Date()}
                   mode="date"
                   display="default"
-                  onChange={(event, selectedDate) => {
+                  onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
                     setShowEndDatePicker(false);
                     if (selectedDate) {
                       setExportEndDate(selectedDate);

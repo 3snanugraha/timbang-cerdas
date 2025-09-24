@@ -204,19 +204,27 @@ export default function ProfilePage() {
         return;
       }
 
-      // Verify current password
-      const isValidPassword = await DatabaseService.verifyPassword(
-        currentUser.username, 
+      // Verify current password using AuthService
+      const isValidPassword = await AuthService.verifyPassword(
+        currentUser.username,
         passwordForm.currentPassword
       );
-      
+
       if (!isValidPassword) {
         Alert.alert("Error", "Password lama tidak benar");
         return;
       }
 
-      // Update password in database
-      await DatabaseService.updateUserPassword(currentUser.id, passwordForm.newPassword);
+      // Update password using AuthService
+      const changeResult = await AuthService.changePassword(
+        passwordForm.currentPassword,
+        passwordForm.newPassword
+      );
+
+      if (!changeResult.success) {
+        Alert.alert("Error", changeResult.message || "Gagal mengubah password");
+        return;
+      }
       
       setPasswordForm({
         currentPassword: "",
@@ -352,7 +360,7 @@ export default function ProfilePage() {
                 {
                   text: "Konfirmasi",
                   style: "destructive",
-                  onPress: async (input) => {
+                  onPress: async (input: string | undefined) => {
                     if (input !== 'HAPUS') {
                       Alert.alert("Error", "Konfirmasi tidak sesuai. Penghapusan dibatalkan.");
                       return;
@@ -366,8 +374,8 @@ export default function ProfilePage() {
                         return;
                       }
 
-                      // Delete all user transactions
-                      await DatabaseService.deleteAllUserTransactions(currentUser.id);
+                      // Delete all user data
+                      await DatabaseService.deleteAllUserData(currentUser.id);
                       
                       // Refresh profile data to update statistics
                       await loadUserProfile();

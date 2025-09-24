@@ -444,6 +444,25 @@ class AuthService {
       console.error('Refresh session error:', error);
     }
   }
+
+  // Update current user session
+  updateCurrentUser(user: UserSession): void {
+    this.currentUser = user;
+    this.saveSession(user);
+  }
+
+  // Verify password using existing comparePassword method
+  async verifyPassword(username: string, password: string): Promise<boolean> {
+    try {
+      const user = await DatabaseService.getUserByUsername(username);
+      if (!user) return false;
+
+      return await this.comparePassword(password, user.password);
+    } catch (error) {
+      console.error('Verify password error:', error);
+      return false;
+    }
+  }
 }
 
 export default new AuthService();

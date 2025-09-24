@@ -1,0 +1,171 @@
+[{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/profile.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'updateUserProfile' does not exist on type 'DatabaseService'.",
+	"source": "ts",
+	"startLineNumber": 140,
+	"startColumn": 29,
+	"endLineNumber": 140,
+	"endColumn": 46,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/profile.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'updateCurrentUser' does not exist on type 'AuthService'.",
+	"source": "ts",
+	"startLineNumber": 146,
+	"startColumn": 19,
+	"endLineNumber": 146,
+	"endColumn": 36,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/profile.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'verifyPassword' does not exist on type 'DatabaseService'.",
+	"source": "ts",
+	"startLineNumber": 208,
+	"startColumn": 53,
+	"endLineNumber": 208,
+	"endColumn": 67,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/profile.tsx",
+	"owner": "typescript",
+	"code": "7006",
+	"severity": 8,
+	"message": "Parameter 'input' implicitly has an 'any' type.",
+	"source": "ts",
+	"startLineNumber": 355,
+	"startColumn": 35,
+	"endLineNumber": 355,
+	"endColumn": 40,
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/profile.tsx",
+	"owner": "typescript",
+	"code": "2551",
+	"severity": 8,
+	"message": "Property 'deleteAllUserTransactions' does not exist on type 'DatabaseService'. Did you mean 'getUserTransactions'?",
+	"source": "ts",
+	"startLineNumber": 370,
+	"startColumn": 45,
+	"endLineNumber": 370,
+	"endColumn": 70,
+	"relatedInformation": [
+		{
+			"startLineNumber": 322,
+			"startColumn": 9,
+			"endLineNumber": 322,
+			"endColumn": 28,
+			"message": "'getUserTransactions' is declared here.",
+			"resource": "/c:/Users/user/Project/cs tony - thermal/timbang-cerdas/services/DatabaseService.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/settings.tsx",
+	"owner": "typescript",
+	"code": "2551",
+	"severity": 8,
+	"message": "Property 'saveCompanySettings' does not exist on type 'DatabaseService'. Did you mean 'getCompanySettings'?",
+	"source": "ts",
+	"startLineNumber": 148,
+	"startColumn": 29,
+	"endLineNumber": 148,
+	"endColumn": 48,
+	"relatedInformation": [
+		{
+			"startLineNumber": 446,
+			"startColumn": 9,
+			"endLineNumber": 446,
+			"endColumn": 27,
+			"message": "'getCompanySettings' is declared here.",
+			"resource": "/c:/Users/user/Project/cs tony - thermal/timbang-cerdas/services/DatabaseService.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/settings.tsx",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type 'string' is not assignable to type 'number'.",
+	"source": "ts",
+	"startLineNumber": 829,
+	"startColumn": 17,
+	"endLineNumber": 829,
+	"endColumn": 19,
+	"relatedInformation": [
+		{
+			"startLineNumber": 13,
+			"startColumn": 3,
+			"endLineNumber": 13,
+			"endColumn": 5,
+			"message": "The expected type comes from property 'id' which is declared here on type 'Transaction'",
+			"resource": "/c:/Users/user/Project/cs tony - thermal/timbang-cerdas/services/DatabaseService.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/settings.tsx",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type 'string' is not assignable to type 'number'.",
+	"source": "ts",
+	"startLineNumber": 843,
+	"startColumn": 17,
+	"endLineNumber": 843,
+	"endColumn": 24,
+	"relatedInformation": [
+		{
+			"startLineNumber": 14,
+			"startColumn": 3,
+			"endLineNumber": 14,
+			"endColumn": 10,
+			"message": "The expected type comes from property 'user_id' which is declared here on type 'Transaction'",
+			"resource": "/c:/Users/user/Project/cs tony - thermal/timbang-cerdas/services/DatabaseService.ts"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/app/(tabs)/settings.tsx",
+	"owner": "typescript",
+	"code": "2561",
+	"severity": 8,
+	"message": "Object literal may only specify known properties, but 'company_phone_label' does not exist in type 'ThermalSettings'. Did you mean to write 'company_phone'?",
+	"source": "ts",
+	"startLineNumber": 851,
+	"startColumn": 17,
+	"endLineNumber": 851,
+	"endColumn": 36,
+	"relatedInformation": [
+		{
+			"startLineNumber": 21,
+			"startColumn": 3,
+			"endLineNumber": 21,
+			"endColumn": 11,
+			"message": "The expected type comes from property 'settings' which is declared here on type 'IntrinsicAttributes & ThermalReceiptProps'",
+			"resource": "/C:/Users/user/Project/cs tony - thermal/timbang-cerdas/components/thermal/ThermalReceiptTemplate.tsx"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Users/user/Project/cs tony - thermal/timbang-cerdas/services/DatabaseService.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'string | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'number | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'string | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'string | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'string | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'string | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.\n  Overload 2 of 2, '(source: string, ...params: SQLiteVariadicBindParams): Promise<SQLiteRunResult>', gave the following error.\n    Type 'string | undefined' is not assignable to type 'number'.\n      Type 'undefined' is not assignable to type 'number'.",
+	"source": "ts",
+	"startLineNumber": 384,
+	"startColumn": 21,
+	"endLineNumber": 384,
+	"endColumn": 29,
+	"origin": "extHost1"
+}]
