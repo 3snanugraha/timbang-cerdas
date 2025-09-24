@@ -5,7 +5,20 @@
       "Bash(npx tsc:*)",
       "Bash(npx expo install:*)",
       "Bash(npx expo start:*)",
-      "Read(//c/build-timbang/**)"
+      "Read(//c/build-timbang/**)",
+      "Bash(scriptsbuild-optimized.bat)",
+      "Bash(./scripts/build-optimized.bat)",
+      "Bash(export NODE_ENV=production)",
+      "Bash(export EXPO_USE_HERMES=true)",
+      "Bash(./gradlew:*)",
+      "Bash(npx expo prebuild:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c:*)"
     ],
     "deny": [],
     "ask": []

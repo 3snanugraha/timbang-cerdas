@@ -1,31 +1,29 @@
-import { Text, View, ScrollView, Pressable, TextInput, Alert, RefreshControl, Modal } from "react-native";
-import { useState, useEffect, useCallback } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "@react-navigation/native";
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import {
-  Search,
-  Filter,
-  Calendar,
-  Package,
-  MoreVertical,
-  Edit3,
-  Trash2,
-  Printer,
-  Clock,
-  X,
-  DollarSign,
-  Send,
-  Download
-} from "lucide-react-native";
-import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import * as Print from 'expo-print';
+import { router } from "expo-router";
+import {
+  Calendar,
+  Clock,
+  DollarSign,
+  Download,
+  Filter,
+  MoreVertical,
+  Package,
+  Printer,
+  Search,
+  Send,
+  X
+} from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import * as Sharing from 'expo-sharing';
+import { generateTransactionExportHTML } from '../../components/export/TransactionExportTemplate';
+import { ThermalPrintService, ThermalReceiptPreview, type ThermalSettings } from '../../components/thermal';
 import AuthService from "../../services/AuthService";
 import DatabaseService, { Transaction } from "../../services/DatabaseService";
-import { ThermalPrintService, ThermalReceiptPreview, type ThermalSettings } from '../../components/thermal';
-import { generateTransactionExportHTML } from '../../components/export/TransactionExportTemplate';
-import * as Sharing from 'expo-sharing';
 
 // Using Transaction interface from DatabaseService
 
@@ -214,49 +212,49 @@ export default function HistoryPage() {
     setShowActionModal(true);
   };
 
-  const handleEdit = () => {
-    if (selectedTransaction) {
-      setShowActionModal(false);
-      // TODO: Navigate to edit transaction page
-      Alert.alert("Info", "Fitur edit akan diimplementasikan");
-    }
-  };
+  // const handleEdit = () => {
+  //   if (selectedTransaction) {
+  //     setShowActionModal(false);
+  //     // TODO: Navigate to edit transaction page
+  //     Alert.alert("Info", "Fitur edit akan diimplementasikan");
+  //   }
+  // };
 
-  const handleDelete = () => {
-    if (selectedTransaction) {
-      Alert.alert(
-        "Hapus Transaksi",
-        `Apakah Anda yakin ingin menghapus transaksi ${selectedTransaction.customer_name}?`,
-        [
-          { text: "Batal", style: "cancel" },
-          {
-            text: "Hapus",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) {
-                  Alert.alert("Error", "Session expired");
-                  return;
-                }
+  // const handleDelete = () => {
+  //   if (selectedTransaction) {
+  //     Alert.alert(
+  //       "Hapus Transaksi",
+  //       `Apakah Anda yakin ingin menghapus transaksi ${selectedTransaction.customer_name}?`,
+  //       [
+  //         { text: "Batal", style: "cancel" },
+  //         {
+  //           text: "Hapus",
+  //           style: "destructive",
+  //           onPress: async () => {
+  //             try {
+  //               const currentUser = AuthService.getCurrentUser();
+  //               if (!currentUser) {
+  //                 Alert.alert("Error", "Session expired");
+  //                 return;
+  //               }
                 
-                // Delete transaction from database
-                await DatabaseService.deleteTransaction(selectedTransaction.id, currentUser.id);
+  //               // Delete transaction from database
+  //               await DatabaseService.deleteTransaction(selectedTransaction.id, currentUser.id);
                 
-                // Update local state
-                setTransactions(prev => prev.filter(t => t.id !== selectedTransaction.id));
-                setShowActionModal(false);
-                Alert.alert("Berhasil", "Transaksi berhasil dihapus");
-              } catch (error) {
-                console.error('Delete transaction error:', error);
-                Alert.alert("Error", "Gagal menghapus transaksi");
-              }
-            }
-          }
-        ]
-      );
-    }
-  };
+  //               // Update local state
+  //               setTransactions(prev => prev.filter(t => t.id !== selectedTransaction.id));
+  //               setShowActionModal(false);
+  //               Alert.alert("Berhasil", "Transaksi berhasil dihapus");
+  //             } catch (error) {
+  //               console.error('Delete transaction error:', error);
+  //               Alert.alert("Error", "Gagal menghapus transaksi");
+  //             }
+  //           }
+  //         }
+  //       ]
+  //     );
+  //   }
+  // };
 
   const handlePrint = () => {
     if (selectedTransaction && thermalSettings) {
@@ -809,13 +807,13 @@ export default function HistoryPage() {
                 </Text>
 
                 <View className="space-y-3">
-                  <Pressable
+                  {/* <Pressable
                     onPress={handleEdit}
                     className="flex-row items-center py-3 px-4 rounded-lg bg-blue-50"
                   >
                     <Edit3 size={20} color="#2563eb" />
                     <Text className="text-blue-700 font-medium ml-3">Edit Transaksi</Text>
-                  </Pressable>
+                  </Pressable> */}
 
                   <Pressable
                     onPress={handlePrint}
@@ -833,13 +831,13 @@ export default function HistoryPage() {
                     <Text className="text-blue-700 font-medium ml-3">Kirim PDF</Text>
                   </Pressable>
 
-                  <Pressable
+                  {/* <Pressable
                     onPress={handleDelete}
                     className="flex-row items-center py-3 px-4 rounded-lg bg-red-50"
                   >
                     <Trash2 size={20} color="#dc2626" />
                     <Text className="text-red-700 font-medium ml-3">Hapus Transaksi</Text>
-                  </Pressable>
+                  </Pressable> */}
                 </View>
 
                 <Pressable

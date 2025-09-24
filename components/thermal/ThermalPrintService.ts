@@ -39,10 +39,16 @@ class ThermalPrintService {
       total_harga: transaction.total_harga
     });
 
-    // Simple, reliable formatters
+    // Simple, reliable formatters that use settings
     const formatMoney = (amount: number): string => {
       const validAmount = isNaN(amount) ? 0 : amount;
-      return 'Rp ' + validAmount.toLocaleString('id-ID');
+      const formattedNumber = validAmount
+        .toLocaleString('id-ID', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        })
+        .replace(/,/g, settings.thousand_separator);
+      return settings.currency_symbol + ' ' + formattedNumber;
     };
 
     const formatWeight = (weight: number): string => {
@@ -51,7 +57,22 @@ class ThermalPrintService {
 
     const formatSimpleDate = (dateString: string): string => {
       const date = new Date(dateString);
-      return date.toLocaleDateString('id-ID');
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+
+      let formattedDate = settings.date_format
+        .replace('DD', day)
+        .replace('MM', month)
+        .replace('YYYY', year.toString());
+
+      if (settings.show_time) {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        formattedDate += ' ' + hours + ':' + minutes;
+      }
+
+      return formattedDate;
     };
 
     // Build content sections using string concatenation
@@ -161,11 +182,13 @@ class ThermalPrintService {
     html += '    <tr class="total-row"><td>Jumlah</td><td>:</td><td>' + formatMoney(transaction.total_harga) + '</td></tr>\n';
     html += '  </table>\n';
     html += '  <div class="separator"></div>\n';
-    html += '  <table>\n';
-    html += '    ' + adminSection + '\n';
-    html += '    ' + customerSection + '\n';
-    html += '  </table>\n';
-    html += '  <div class="separator"></div>\n';
+    if (customerSection || adminSection) {
+      html += '  <table>\n';
+      html += '    ' + customerSection + '\n';
+      html += '    ' + adminSection + '\n';
+      html += '  </table>\n';
+      html += '  <div class="separator"></div>\n';
+    }
     if (notesSection) {
       html += '  <table>\n';
       html += '    ' + notesSection + '\n';

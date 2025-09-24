@@ -6,9 +6,7 @@ import {
   Info,
   LogOut,
   Printer,
-  RefreshCw,
   Save,
-  Settings,
   User,
   X
 } from "lucide-react-native";
@@ -19,7 +17,8 @@ import { ThermalReceiptTemplate } from '../../components/thermal';
 import AuthService from "../../services/AuthService";
 import DatabaseService from "../../services/DatabaseService";
 
-interface CompanySettings {
+// UI state interface (subset of CompanySettings for form state)
+interface CompanySettingsUI {
   company_name: string;
   company_address: string;
   company_phone: string;
@@ -34,23 +33,16 @@ interface CompanySettings {
   currency_symbol: string;
 }
 
-interface AppSettings {
-  auto_backup: boolean;
-  backup_frequency: 'daily' | 'weekly' | 'monthly';
-  default_jenis_barang: string;
-  auto_calculate: boolean;
-  require_confirmation: boolean;
-  print_after_save: boolean;
-}
 
-type SettingsTab = 'company' | 'receipt' | 'app';
+type SettingsTab = 'company' | 'receipt';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('company');
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
-  const [companySettings, setCompanySettings] = useState<CompanySettings>({
+  const [companySettings, setCompanySettings] = useState<CompanySettingsUI>({
     company_name: "RAM SEKAWAN JAYA SEJAHTERA",
     company_address: "Kelurahan Sari Bungamas Lahat",
     company_phone: "0813 7779 0785",
@@ -65,16 +57,9 @@ export default function SettingsPage() {
     currency_symbol: "Rp",
   });
 
-  const [appSettings, setAppSettings] = useState<AppSettings>({
-    auto_backup: true,
-    backup_frequency: 'weekly',
-    default_jenis_barang: '',
-    auto_calculate: true,
-    require_confirmation: true,
-    print_after_save: false,
-  });
 
   const loadSettings = async () => {
+    setLoadingSettings(true);
     try {
       const currentUser = AuthService.getCurrentUser();
       if (!currentUser) {
@@ -85,27 +70,91 @@ export default function SettingsPage() {
 
       // Load company settings from database
       const dbSettings = await DatabaseService.getCompanySettings(currentUser.id);
+      console.log("Loaded dbSettings:", dbSettings);
       if (dbSettings) {
+        console.log("Setting company settings with:", {
+          show_admin: dbSettings.show_admin,
+          show_customer: dbSettings.show_customer,
+          show_notes: dbSettings.show_notes,
+          show_time: dbSettings.show_time
+        });
+        console.log("Converted to boolean:", {
+          show_admin: Boolean(dbSettings.show_admin),
+          show_customer: Boolean(dbSettings.show_customer),
+          show_notes: Boolean(dbSettings.show_notes),
+          show_time: Boolean(dbSettings.show_time)
+        });
         setCompanySettings({
           company_name: dbSettings.company_name,
           company_address: dbSettings.company_address,
           company_phone: dbSettings.company_phone,
           footer_text: dbSettings.footer_text,
-          show_admin: dbSettings.show_admin,
-          show_customer: dbSettings.show_customer,
-          show_notes: dbSettings.show_notes,
+          show_admin: Boolean(dbSettings.show_admin),
+          show_customer: Boolean(dbSettings.show_customer),
+          show_notes: Boolean(dbSettings.show_notes),
           date_format: dbSettings.date_format,
-          show_time: dbSettings.show_time,
+          show_time: Boolean(dbSettings.show_time),
           decimal_places: dbSettings.decimal_places || 0,
           thousand_separator: dbSettings.thousand_separator,
           currency_symbol: dbSettings.currency_symbol,
         });
+      } else {
+        console.log("No dbSettings found, creating default settings in database");
+        // Create default settings in database if none exist
+        await DatabaseService.saveCompanySettings(currentUser.id, {
+          company_name: "RAM SEKAWAN JAYA SEJAHTERA",
+          company_address: "Kelurahan Sari Bungamas Lahat",
+          company_phone: "0813 7779 0785",
+          company_phone_label: "",
+          footer_text: "Terima Kasih",
+          show_admin: true,
+          show_customer: true,
+          show_notes: true,
+          paper_width: 58,
+          font_size_header: 12,
+          font_size_body: 10,
+          font_size_footer: 10,
+          use_separator_lines: true,
+          separator_char: "-",
+          date_format: "DD/MM/YYYY",
+          show_time: false,
+          decimal_places: 0,
+          thousand_separator: ".",
+          decimal_separator: ",",
+          currency_symbol: "Rp",
+        });
+        // Reload settings after creating defaults
+        const newDbSettings = await DatabaseService.getCompanySettings(currentUser.id);
+        if (newDbSettings) {
+          console.log("Setting company settings with NEW defaults:", {
+            show_admin: newDbSettings.show_admin,
+            show_customer: newDbSettings.show_customer,
+            show_notes: newDbSettings.show_notes,
+            show_time: newDbSettings.show_time
+          });
+          setCompanySettings({
+            company_name: newDbSettings.company_name,
+            company_address: newDbSettings.company_address,
+            company_phone: newDbSettings.company_phone,
+            footer_text: newDbSettings.footer_text,
+            show_admin: Boolean(newDbSettings.show_admin),
+            show_customer: Boolean(newDbSettings.show_customer),
+            show_notes: Boolean(newDbSettings.show_notes),
+            date_format: newDbSettings.date_format,
+            show_time: Boolean(newDbSettings.show_time),
+            decimal_places: newDbSettings.decimal_places || 0,
+            thousand_separator: newDbSettings.thousand_separator,
+            currency_symbol: newDbSettings.currency_symbol,
+          });
+        }
       }
-      
+
       console.log("Settings loaded successfully");
     } catch (error) {
       console.error("Failed to load settings:", error);
       Alert.alert("Error", "Gagal memuat pengaturan");
+    } finally {
+      setLoadingSettings(false);
     }
   };
 
@@ -177,58 +226,7 @@ export default function SettingsPage() {
     }
   };
 
-  const saveAppSettings = async () => {
-    setLoading(true);
-    try {
-      // TODO: Save to SQLite database
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert("Berhasil", "Pengaturan aplikasi berhasil disimpan");
-    } catch (error) {
-      console.error("Failed to save app settings:", error);
-      Alert.alert("Error", "Gagal menyimpan pengaturan");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const resetToDefaults = () => {
-    Alert.alert(
-      "Reset Pengaturan",
-      "Apakah Anda yakin ingin mereset semua pengaturan ke default?",
-      [
-        { text: "Batal", style: "cancel" },
-        {
-          text: "Reset",
-          style: "destructive",
-          onPress: () => {
-            setCompanySettings({
-              company_name: "RAM SEKAWAN JAYA SEJAHTERA",
-              company_address: "Kelurahan Sari Bungamas Lahat",
-              company_phone: "0813 7779 0785",
-              footer_text: "Terima Kasih",
-              show_admin: true,
-              show_customer: true,
-              show_notes: true,
-              date_format: "DD/MM/YYYY",
-              show_time: false,
-              decimal_places: 0,
-              thousand_separator: ".",
-              currency_symbol: "Rp",
-            });
-            setAppSettings({
-              auto_backup: true,
-              backup_frequency: 'weekly',
-              default_jenis_barang: '',
-              auto_calculate: true,
-              require_confirmation: true,
-              print_after_save: false,
-            });
-            Alert.alert("Berhasil", "Pengaturan berhasil direset");
-          }
-        }
-      ]
-    );
-  };
 
   const previewReceipt = () => {
     setShowPreview(true);
@@ -518,8 +516,9 @@ export default function SettingsPage() {
           </Text>
           
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={{ fontSize: 14, color: '#374151' }}>Tampilkan Admin</Text>
+            <Text style={{ fontSize: 14, color: loadingSettings ? '#9ca3af' : '#374151' }}>Tampilkan Admin</Text>
             <Switch
+              disabled={loadingSettings}
               value={companySettings.show_admin}
               onValueChange={(value) => setCompanySettings(prev => ({ ...prev, show_admin: value }))}
               trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
@@ -528,8 +527,9 @@ export default function SettingsPage() {
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={{ fontSize: 14, color: '#374151' }}>Tampilkan Customer</Text>
+            <Text style={{ fontSize: 14, color: loadingSettings ? '#9ca3af' : '#374151' }}>Tampilkan Customer</Text>
             <Switch
+              disabled={loadingSettings}
               value={companySettings.show_customer}
               onValueChange={(value) => setCompanySettings(prev => ({ ...prev, show_customer: value }))}
               trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
@@ -538,8 +538,9 @@ export default function SettingsPage() {
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={{ fontSize: 14, color: '#374151' }}>Tampilkan Catatan</Text>
+            <Text style={{ fontSize: 14, color: loadingSettings ? '#9ca3af' : '#374151' }}>Tampilkan Catatan</Text>
             <Switch
+              disabled={loadingSettings}
               value={companySettings.show_notes}
               onValueChange={(value) => setCompanySettings(prev => ({ ...prev, show_notes: value }))}
               trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
@@ -548,8 +549,9 @@ export default function SettingsPage() {
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ fontSize: 14, color: '#374151' }}>Tampilkan Waktu</Text>
+            <Text style={{ fontSize: 14, color: loadingSettings ? '#9ca3af' : '#374151' }}>Tampilkan Waktu</Text>
             <Switch
+              disabled={loadingSettings}
               value={companySettings.show_time}
               onValueChange={(value) => setCompanySettings(prev => ({ ...prev, show_time: value }))}
               trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
@@ -601,121 +603,6 @@ export default function SettingsPage() {
     </View>
   );
 
-  const renderAppSettings = () => (
-    <View style={{ padding: 24 }}>
-      {/* App Behavior */}
-      <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#e5e7eb' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-          <Settings size={20} color="#2563eb" />
-          <Text style={{ fontSize: 18, fontWeight: '600', color: '#111827', marginLeft: 8 }}>
-            Pengaturan Aplikasi
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, color: '#374151' }}>Auto Kalkulasi</Text>
-          <Switch
-            value={appSettings.auto_calculate}
-            onValueChange={(value) => setAppSettings(prev => ({ ...prev, auto_calculate: value }))}
-            trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
-            thumbColor={appSettings.auto_calculate ? '#ffffff' : '#d1d5db'}
-          />
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, color: '#374151' }}>Konfirmasi Sebelum Simpan</Text>
-          <Switch
-            value={appSettings.require_confirmation}
-            onValueChange={(value) => setAppSettings(prev => ({ ...prev, require_confirmation: value }))}
-            trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
-            thumbColor={appSettings.require_confirmation ? '#ffffff' : '#d1d5db'}
-          />
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, color: '#374151' }}>Auto Cetak Setelah Simpan</Text>
-          <Switch
-            value={appSettings.print_after_save}
-            onValueChange={(value) => setAppSettings(prev => ({ ...prev, print_after_save: value }))}
-            trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
-            thumbColor={appSettings.print_after_save ? '#ffffff' : '#d1d5db'}
-          />
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, color: '#374151' }}>Auto Backup Data</Text>
-          <Switch
-            value={appSettings.auto_backup}
-            onValueChange={(value) => setAppSettings(prev => ({ ...prev, auto_backup: value }))}
-            trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
-            thumbColor={appSettings.auto_backup ? '#ffffff' : '#d1d5db'}
-          />
-        </View>
-
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 8 }}>
-            Default Jenis Barang
-          </Text>
-          <TextInput
-            value={appSettings.default_jenis_barang}
-            onChangeText={(value) => setAppSettings(prev => ({ ...prev, default_jenis_barang: value }))}
-            placeholder="Kelapa Sawit"
-            style={{
-              width: '100%',
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-              borderWidth: 1,
-              borderColor: '#d1d5db',
-              borderRadius: 12,
-              color: '#111827',
-              backgroundColor: 'white',
-            }}
-            placeholderTextColor="#9ca3af"
-          />
-        </View>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
-        <Pressable
-          onPress={resetToDefaults}
-          style={{
-            flex: 1,
-            paddingVertical: 16,
-            borderRadius: 16,
-            backgroundColor: '#dc2626',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-          }}
-        >
-          <RefreshCw size={20} color="white" style={{ marginRight: 8 }} />
-          <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
-            Reset
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={saveAppSettings}
-          disabled={loading}
-          style={{
-            flex: 1,
-            paddingVertical: 16,
-            borderRadius: 16,
-            backgroundColor: loading ? '#9ca3af' : '#2563eb',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-          }}
-        >
-          <Save size={20} color="white" style={{ marginRight: 8 }} />
-          <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
-            {loading ? "Menyimpan..." : "Simpan"}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
@@ -731,7 +618,6 @@ export default function SettingsPage() {
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {renderTabButton('company', 'Perusahaan', <Building2 size={16} color={activeTab === 'company' ? 'white' : '#374151'} />)}
           {renderTabButton('receipt', 'Struk', <Printer size={16} color={activeTab === 'receipt' ? 'white' : '#374151'} />)}
-          {renderTabButton('app', 'Aplikasi', <Settings size={16} color={activeTab === 'app' ? 'white' : '#374151'} />)}
         </View>
       </View>
 
@@ -739,7 +625,6 @@ export default function SettingsPage() {
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {activeTab === 'company' && renderCompanySettings()}
         {activeTab === 'receipt' && renderReceiptSettings()}
-        {activeTab === 'app' && renderAppSettings()}
         
         {/* User Profile & Logout Section - Always visible at bottom */}
         <View style={{ padding: 24 }}>
@@ -792,7 +677,7 @@ export default function SettingsPage() {
               </Text>
             </View>
             <Text style={{ fontSize: 12, color: '#6b7280', marginBottom: 2 }}>
-              Timbang Cerdas v1.0.0
+              Timbang Cerdas v1.0.1
             </Text>
             <Text style={{ fontSize: 12, color: '#6b7280' }}>
               © 2025 4SEKAWAN

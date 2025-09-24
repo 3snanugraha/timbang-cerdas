@@ -496,7 +496,7 @@ export default function ProfilePage() {
             {renderMenuItem(
               <Info size={20} color="#6b7280" />,
               "Versi Aplikasi",
-              "Timbang Cerdas v1.0.0",
+              "Timbang Cerdas v1.0.1",
               () => Alert.alert("Info", "Timbang Cerdas\nVersi 1.0.0\n\n4SEKAWAN")
             )}
             {renderMenuItem(
