@@ -61,10 +61,10 @@ const ThermalReceiptTemplate: React.FC<ThermalReceiptProps> = ({
   isPreview = false 
 }) => {
   const textStyle = {
-    fontSize: isPreview ? 12 : 10,
+    fontSize: isPreview ? 13 : 11,
     fontFamily: 'monospace',
     color: '#000',
-    lineHeight: isPreview ? 14 : 12,
+    lineHeight: isPreview ? 16 : 14,
   };
 
   const boldTextStyle = {
@@ -83,34 +83,35 @@ const ThermalReceiptTemplate: React.FC<ThermalReceiptProps> = ({
   };
 
   return (
-    <View style={{ 
+    <View style={{
       backgroundColor: isPreview ? '#f9fafb' : 'white',
-      padding: isPreview ? 16 : 8,
+      padding: isPreview ? 20 : 12,
       borderRadius: isPreview ? 8 : 0,
       width: isPreview ? '100%' : 384, // 58mm thermal paper width in pixels
+      minHeight: isPreview ? 450 : 350, // Longer receipt for professional look
     }}>
-      {/* Header Separator */}
-      <Text style={centerBoldTextStyle}>
+      {/* Top Border */}
+      <Text style={{...centerBoldTextStyle, fontSize: isPreview ? 10 : 8, marginBottom: 8}}>
         ================================
       </Text>
-      
+
       {/* Company Name */}
-      <Text style={centerBoldTextStyle}>
+      <Text style={{...centerBoldTextStyle, fontSize: isPreview ? 16 : 14, marginBottom: 4}}>
         {settings.company_name}
       </Text>
-      
+
       {/* Company Address */}
-      <Text style={centerTextStyle}>
+      <Text style={{...centerTextStyle, fontSize: isPreview ? 12 : 10, marginBottom: 2}}>
         {settings.company_address}
       </Text>
-      
+
       {/* Company Phone */}
-      <Text style={centerTextStyle}>
+      <Text style={{...centerTextStyle, fontSize: isPreview ? 12 : 10, marginBottom: 8}}>
         HP: {settings.company_phone}
       </Text>
-      
+
       {/* Header Separator */}
-      <Text style={centerBoldTextStyle}>
+      <Text style={{...centerBoldTextStyle, fontSize: isPreview ? 10 : 8, marginBottom: 8}}>
         ================================
       </Text>
       
@@ -158,12 +159,12 @@ const ThermalReceiptTemplate: React.FC<ThermalReceiptProps> = ({
       </Text>
       
       {/* Total Amount */}
-      <Text style={boldTextStyle}>
+      <Text style={{...boldTextStyle, fontSize: isPreview ? 14 : 12, marginVertical: 4}}>
         Jumlah Uang: {formatCurrency(transaction.total_harga, settings.currency_symbol, settings.thousand_separator)}
       </Text>
-      
+
       {/* Separator */}
-      <Text style={textStyle}>
+      <Text style={{...textStyle, textAlign: 'center', marginVertical: 8}}>
         --------------------------------
       </Text>
       
@@ -182,13 +183,22 @@ const ThermalReceiptTemplate: React.FC<ThermalReceiptProps> = ({
       )}
       
       {/* Separator */}
-      <Text style={textStyle}>
+      <Text style={{...textStyle, textAlign: 'center', marginVertical: 8}}>
         --------------------------------
       </Text>
-      
+
+      {/* Bottom Border */}
+      <Text style={{...centerBoldTextStyle, fontSize: isPreview ? 10 : 8, marginTop: 8}}>
+        ================================
+      </Text>
+
       {/* Footer Text */}
-      <Text style={centerTextStyle}>
-        {settings.footer_text}
+      <Text style={{...centerBoldTextStyle, fontSize: isPreview ? 14 : 12, marginVertical: 8}}>
+        ~ {settings.footer_text} ~
+      </Text>
+
+      <Text style={{...centerBoldTextStyle, fontSize: isPreview ? 10 : 8, marginTop: 4}}>
+        ================================
       </Text>
       
       {/* Notes */}

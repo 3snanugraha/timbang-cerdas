@@ -7,8 +7,8 @@ export const APP_INFO = {
   NAME: 'Timbang Cerdas',
   VERSION: '1.0.0',
   DESCRIPTION: 'Smart Weighing Scale Application',
-  DEVELOPER: 'CS Tony Development',
-  COPYRIGHT: '© 2024 CS Tony Development',
+  DEVELOPER: '4SEKAWAN',
+  COPYRIGHT: '© 2025 4SEKAWAN',
 } as const;
 
 // Database Configuration

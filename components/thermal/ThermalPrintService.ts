@@ -77,7 +77,7 @@ class ThermalPrintService {
 
     let notesSection = '';
     if (settings.show_notes && transaction.catatan) {
-      notesSection = '<tr><td colspan="3" style="padding-top:5px;font-style:italic;">Catatan: ' + transaction.catatan + '</td></tr>';
+      notesSection = '<tr><td colspan="3" style="padding-top:3px;font-style:italic;font-size:10px;text-align:center;">Catatan: ' + transaction.catatan + '</td></tr>';
     }
 
     // Build HTML using string concatenation
@@ -90,49 +90,64 @@ class ThermalPrintService {
     html += '    * {\n';
     html += '      margin: 0;\n';
     html += '      padding: 0;\n';
+    html += '      box-sizing: border-box;\n';
     html += '      font-family: \'Courier New\', monospace;\n';
-    html += '      font-size: 12px;\n';
+    html += '      font-size: 11px;\n';
+    html += '      line-height: 1.3;\n';
     html += '    }\n';
     html += '    body {\n';
-    html += '      width: 155px;\n';
-    html += '      max-width: 155px;\n';
-    html += '      padding: 5px;\n';
+    html += '      width: 132px;\n';
+    html += '      max-width: 132px;\n';
+    html += '      padding: 8px 4px;\n';
+    html += '      margin: 0 auto;\n';
     html += '      background: white;\n';
     html += '      color: black;\n';
+    html += '      line-height: 1.3;\n';
     html += '    }\n';
     html += '    .center {\n';
     html += '      text-align: center;\n';
+    html += '      margin: 2px 0;\n';
+    html += '      padding: 1px 0;\n';
     html += '    }\n';
     html += '    .bold {\n';
     html += '      font-weight: bold;\n';
     html += '    }\n';
     html += '    .separator {\n';
     html += '      border-top: 1px dashed black;\n';
-    html += '      margin: 3px 0;\n';
+    html += '      margin: 4px 0;\n';
     html += '      width: 100%;\n';
+    html += '      height: 1px;\n';
+    html += '    }\n';
+    html += '    .thick-separator {\n';
+    html += '      border-top: 2px solid black;\n';
+    html += '      margin: 6px 0;\n';
+    html += '      width: 100%;\n';
+    html += '      height: 2px;\n';
     html += '    }\n';
     html += '    table {\n';
     html += '      width: 100%;\n';
     html += '      border-collapse: collapse;\n';
-    html += '      margin: 2px 0;\n';
+    html += '      margin: 3px 0;\n';
     html += '    }\n';
     html += '    td {\n';
     html += '      padding: 1px 2px;\n';
     html += '      vertical-align: top;\n';
+    html += '      font-size: 11px;\n';
     html += '    }\n';
     html += '    .total-row {\n';
     html += '      font-weight: bold;\n';
-    html += '      font-size: 13px;\n';
+    html += '      font-size: 12px;\n';
     html += '      padding-top: 2px;\n';
+    html += '      border-top: 1px solid black;\n';
     html += '    }\n';
     html += '  </style>\n';
     html += '</head>\n';
     html += '<body>\n';
-    html += '  <div class="center bold">================================</div>\n';
-    html += '  <div class="center bold">' + settings.company_name + '</div>\n';
-    html += '  <div class="center">' + settings.company_address + '</div>\n';
-    html += '  <div class="center">HP: ' + settings.company_phone + '</div>\n';
-    html += '  <div class="center bold">================================</div>\n';
+    html += '  <div class="thick-separator"></div>\n';
+    html += '  <div class="center bold" style="font-size: 13px; margin: 4px 0;">' + settings.company_name + '</div>\n';
+    html += '  <div class="center" style="font-size: 10px; margin: 2px 0;">' + settings.company_address + '</div>\n';
+    html += '  <div class="center" style="font-size: 10px; margin: 2px 0;">HP: ' + settings.company_phone + '</div>\n';
+    html += '  <div class="thick-separator"></div>\n';
     html += '  <table>\n';
     html += '    <tr><td>Tanggal</td><td>:</td><td>' + formatSimpleDate(transaction.transaction_date) + '</td></tr>\n';
     html += '    <tr><td>Barang</td><td>:</td><td>' + transaction.jenis_barang + '</td></tr>\n';
@@ -151,12 +166,15 @@ class ThermalPrintService {
     html += '    ' + customerSection + '\n';
     html += '  </table>\n';
     html += '  <div class="separator"></div>\n';
-    html += '  <div class="center">' + settings.footer_text + '</div>\n';
     if (notesSection) {
       html += '  <table>\n';
       html += '    ' + notesSection + '\n';
       html += '  </table>\n';
+      html += '  <div class="separator"></div>\n';
     }
+    html += '  <div class="thick-separator"></div>\n';
+    html += '  <div class="center bold" style=\"font-size: 12px; margin: 6px 0;\">~ ' + settings.footer_text + ' ~</div>\n';
+    html += '  <div class="thick-separator"></div>\n';
     html += '</body>\n';
     html += '</html>';
 
@@ -175,7 +193,13 @@ class ThermalPrintService {
       await Print.printAsync({
         html,
         // printerUrl: printer?.url, // Use selected printer
-        width: 155, // Corresponds to 58mm paper width, adjust as needed
+        width: 132, // Optimized for 58mm paper width (58mm = 132px at 60DPI)
+        margins: {
+          left: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+        },
       });
 
       console.log('Print job sent successfully');

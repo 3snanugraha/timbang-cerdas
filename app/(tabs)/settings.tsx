@@ -1,23 +1,23 @@
-import { Text, View, ScrollView, Pressable, TextInput, Alert, Switch, Modal } from "react-native";
-import { useState, useEffect, useCallback } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import { 
-  Settings,
+import {
   Building2,
-  Printer,
   FileText,
-  Save,
-  RefreshCw,
-  X,
   Info,
   LogOut,
-  User
+  Printer,
+  RefreshCw,
+  Save,
+  Settings,
+  User,
+  X
 } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ThermalReceiptTemplate } from '../../components/thermal';
 import AuthService from "../../services/AuthService";
 import DatabaseService from "../../services/DatabaseService";
-import { ThermalReceiptTemplate } from '../../components/thermal';
 
 interface CompanySettings {
   company_name: string;
@@ -795,7 +795,7 @@ export default function SettingsPage() {
               Timbang Cerdas v1.0.0
             </Text>
             <Text style={{ fontSize: 12, color: '#6b7280' }}>
-              © 2024 RAM SEKAWAN JAYA SEJAHTERA
+              © 2025 4SEKAWAN
             </Text>
           </View>
         </View>

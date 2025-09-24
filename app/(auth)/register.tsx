@@ -1,10 +1,10 @@
-import { Text, View, TextInput, Pressable, ScrollView, Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
-import { useState } from "react";
 import { Link, router } from "expo-router";
+import { Lock, Mail, User, UserPlus } from "lucide-react-native";
+import { useState } from "react";
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { User, Lock, UserPlus, Mail } from "lucide-react-native";
-import type { RegisterFormData } from "../../types";
 import AuthService from "../../services/AuthService";
+import type { RegisterFormData } from "../../types";
 import { ValidationUtils } from "../../utils/validation";
 
 export default function RegisterPage() {
@@ -202,7 +202,7 @@ export default function RegisterPage() {
         {/* Footer */}
         <View className="items-center pb-6">
           <Text className="text-xs text-gray-400">
-            RAM SEKAWAN JAYA SEJAHTERA
+            4SEKAWAN
           </Text>
         </View>
       </KeyboardAvoidingView>

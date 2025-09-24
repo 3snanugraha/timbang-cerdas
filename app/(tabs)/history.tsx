@@ -898,6 +898,7 @@ export default function HistoryPage() {
                   mode="date"
                   display="default"
                   onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                    setShowStartDatePicker(false);
                     if (selectedDate) {
                       setExportStartDate(selectedDate);
                     }

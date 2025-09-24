@@ -1,9 +1,9 @@
-import { Text, View, ActivityIndicator, Image } from "react-native";
-import { useEffect } from "react";
 import { router } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DatabaseService from "../services/DatabaseService";
 import AuthService from "../services/AuthService";
+import DatabaseService from "../services/DatabaseService";
 
 export default function Index() {
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function Index() {
         </Text>
         <Text className="text-base text-gray-600 mb-12 text-center leading-6">
           Sistem Timbangan Digital Cerdas{"\n"}
-          RAM SEKAWAN JAYA SEJAHTERA
+          4SEKAWAN
         </Text>
         
         {/* Loading Indicator */}

@@ -1,23 +1,23 @@
-import { Text, View, ScrollView, Pressable, Alert, Modal, TextInput } from "react-native";
-import { useState, useEffect, useCallback } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
 import {
-  User,
-  Settings,
-  LogOut,
-  Edit3,
-  Save,
-  Lock,
-  Download,
-  Upload,
-  Trash2,
-  Shield,
-  Info,
   ChevronRight,
+  Download,
+  Edit3,
+  Info,
+  Lock,
+  LogOut,
+  Save,
+  Settings,
+  Shield,
+  Trash2,
+  Upload,
+  User,
   X
 } from "lucide-react-native";
-import { router } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AuthService from "../../services/AuthService";
 import DatabaseService from "../../services/DatabaseService";
 
@@ -612,13 +612,13 @@ export default function ProfilePage() {
               <Info size={20} color="#6b7280" />,
               "Versi Aplikasi",
               "Timbang Cerdas v1.0.0",
-              () => Alert.alert("Info", "Timbang Cerdas\nVersi 1.0.0\n\nRAM SEKAWAN JAYA SEJAHTERA")
+              () => Alert.alert("Info", "Timbang Cerdas\nVersi 1.0.0\n\n4SEKAWAN")
             )}
             {renderMenuItem(
               <Shield size={20} color="#6b7280" />,
               "Lisensi",
               "Informasi lisensi aplikasi",
-              () => Alert.alert("Lisensi", "Timbang Cerdas\n© 2024 RAM SEKAWAN JAYA SEJAHTERA\nAll rights reserved.")
+              () => Alert.alert("Lisensi", "Timbang Cerdas\n© 2025 4SEKAWAN\nAll rights reserved.")
             )}
           </View>
         </View>
