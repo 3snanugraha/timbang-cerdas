@@ -2,7 +2,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import {
   ChevronRight,
-  Download,
   Edit3,
   Info,
   Lock,
@@ -11,7 +10,6 @@ import {
   Settings,
   Shield,
   Trash2,
-  Upload,
   User,
   X
 } from "lucide-react-native";
@@ -239,107 +237,6 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleExportData = () => {
-    Alert.alert(
-      "Export Data",
-      "Pilih format export data transaksi:",
-      [
-        { text: "Batal", style: "cancel" },
-        { 
-          text: "JSON", 
-          onPress: async () => {
-            try {
-              const currentUser = AuthService.getCurrentUser();
-              if (!currentUser) {
-                Alert.alert("Error", "Session expired. Please login again.");
-                router.replace("/(auth)/login");
-                return;
-              }
-
-              const transactions = await DatabaseService.getUserTransactions(currentUser.id);
-              const companySettings = await DatabaseService.getCompanySettings(currentUser.id);
-              
-              const exportData = {
-                user: {
-                  username: currentUser.username,
-                  full_name: currentUser.full_name,
-                  created_at: currentUser.created_at,
-                },
-                company_settings: companySettings,
-                transactions: transactions,
-                export_date: new Date().toISOString(),
-                total_transactions: transactions.length,
-                total_revenue: transactions.reduce((sum, t) => sum + t.total_harga, 0),
-              };
-              
-              // In a real app, you would save this to file system and share
-              console.log('Export Data (JSON):', JSON.stringify(exportData, null, 2));
-              Alert.alert("Berhasil", `Data berhasil diekspor!\n\nTotal: ${transactions.length} transaksi\nFormat: JSON`);
-            } catch (error) {
-              console.error('Export error:', error);
-              Alert.alert("Error", "Gagal mengekspor data");
-            }
-          }
-        },
-        { 
-          text: "CSV", 
-          onPress: async () => {
-            try {
-              const currentUser = AuthService.getCurrentUser();
-              if (!currentUser) {
-                Alert.alert("Error", "Session expired. Please login again.");
-                router.replace("/(auth)/login");
-                return;
-              }
-
-              const transactions = await DatabaseService.getUserTransactions(currentUser.id);
-              
-              // Create CSV headers
-              const csvHeaders = [
-                'ID', 'Tanggal', 'Customer', 'Jenis Barang', 'Bruto (Kg)', 'Tare (Kg)', 
-                'Netto (Kg)', 'Pot (%)', 'Pot (Kg)', 'Total (Kg)', 'Harga/Kg', 'Total Harga', 
-                'Admin', 'Catatan', 'Dibuat'
-              ].join(',');
-              
-              // Create CSV rows
-              const csvRows = transactions.map(t => [
-                t.id, t.transaction_date, `"${t.customer_name}"`, `"${t.jenis_barang}"`,
-                t.bruto_kg, t.tare_kg, t.netto_kg, t.pot_percentage, t.pot_kg, t.total_kg,
-                t.harga_per_kg, t.total_harga, `"${t.admin_name}"`, `"${t.catatan || ''}"`, t.created_at
-              ].join(','));
-              
-              const csvContent = [csvHeaders, ...csvRows].join('\n');
-              
-              // In a real app, you would save this to file system and share
-              console.log('Export Data (CSV):', csvContent);
-              Alert.alert("Berhasil", `Data berhasil diekspor!\n\nTotal: ${transactions.length} transaksi\nFormat: CSV`);
-            } catch (error) {
-              console.error('Export error:', error);
-              Alert.alert("Error", "Gagal mengekspor data");
-            }
-          }
-        },
-      ]
-    );
-  };
-
-  const handleImportData = () => {
-    Alert.alert(
-      "Import Data",
-      "Apakah Anda yakin ingin mengimport data? Data yang ada akan ditambahkan dengan data baru.",
-      [
-        { text: "Batal", style: "cancel" },
-        {
-          text: "Import",
-          onPress: () => {
-            // TODO: Implement data import
-            Alert.alert("Info", "Fitur import data akan diimplementasikan");
-          }
-        }
-      ]
-    );
   };
 
   const handleDeleteAllData = () => {
@@ -577,18 +474,6 @@ export default function ProfilePage() {
           </View>
           
           <View style={{ backgroundColor: 'white', marginHorizontal: 24, borderRadius: 12, overflow: 'hidden' }}>
-            {renderMenuItem(
-              <Download size={20} color="#16a34a" />,
-              "Export Data",
-              "Ekspor data ke file JSON/CSV",
-              handleExportData
-            )}
-            {renderMenuItem(
-              <Upload size={20} color="#f59e0b" />,
-              "Import Data",
-              "Import data dari file backup",
-              handleImportData
-            )}
             {renderMenuItem(
               <Trash2 size={20} color="#dc2626" />,
               "Hapus Semua Data",
